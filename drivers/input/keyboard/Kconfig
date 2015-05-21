@@ -200,6 +200,13 @@ config KEYBOARD_GPIO
 	  To compile this driver as a module, choose M here: the
 	  module will be called gpio_keys.
 
+config EDM_GPIO
+	tristate "GPIO framework for EDM"
+	depends on GPIOLIB
+	help
+	  Say Y here if your EDM base board has gpio connected
+	  directly to such GPIO pins.
+
 config KEYBOARD_GPIO_POLLED
 	tristate "Polled GPIO buttons"
 	depends on GPIOLIB
