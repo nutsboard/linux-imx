@@ -17,6 +17,7 @@
 #include <linux/of_platform.h>
 #include <linux/of_gpio.h>
 #include <linux/mutex.h>
+#include <linux/delay.h>
 
 struct gpio_edm_data {
 		unsigned int gpio;
@@ -195,6 +196,7 @@ static int gpio_edm_probe(struct platform_device *pdev)
 	for (i = 0; i < gpio_num; i++) {
 		gpio_location[i]=pdata[i].gpio;
 		error = gpio_edm_setup_key(pdev, &pdata[i]);
+		msleep(15);
 		if (error)
 			goto fail;
 
