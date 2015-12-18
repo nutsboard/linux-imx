@@ -64,6 +64,14 @@ static int gpio_edm_setup_key(struct platform_device *pdev,
 	else
 		goto fail;
 
+	/* bcm43xx BT reset only*/
+	if(!strcmp(desc,"bluetooth-on")) {
+		gpio_direction_output(edm_data->gpio,0);
+		msleep(15);
+		gpio_direction_output(edm_data->gpio,1);
+	}
+
+
 	return 0;
 
 fail:
