@@ -92,6 +92,18 @@
 
 	};
 
+	btwilink {
+		compatible = "btwilink";
+	};
+
+	kim {
+		compatible = "kim";
+		nshutdown_gpio = <49>;
+		dev_name = "/dev/ttymxc4";
+		flow_cntrl = <1>;
+		baud_rate = <921600>;
+	};
+
 	sound {
 		compatible = "fsl,imx6q-sabresd-wm8962",
 			   "fsl,imx-audio-wm8962";
@@ -564,21 +576,13 @@
 		};
 
 
-		pinctrl_uart5_1: uart5grp-1 {
+		pinctrl_uart5: uart5grp {
 			fsl,pins = <
-				MX6QDL_PAD_KEY_COL1__UART5_TX_DATA	0x1b0b1
-				MX6QDL_PAD_KEY_ROW1__UART5_RX_DATA	0x1b0b1
-				MX6QDL_PAD_KEY_COL4__UART5_RTS_B	0x1b0b1
-				MX6QDL_PAD_KEY_ROW4__UART5_CTS_B	0x1b0b1
-			>;
-		};
-
-		pinctrl_uart5dte_1: uart5dtegrp-1 {
-			fsl,pins = <
-				MX6QDL_PAD_KEY_ROW1__UART5_TX_DATA	0x1b0b1
-				MX6QDL_PAD_KEY_COL1__UART5_RX_DATA	0x1b0b1
-				MX6QDL_PAD_KEY_ROW4__UART5_RTS_B	0x1b0b1
-				MX6QDL_PAD_KEY_COL4__UART5_CTS_B	0x1b0b1
+				MX6QDL_PAD_CSI0_DAT14__UART5_TX_DATA	0x1b0b1
+				MX6QDL_PAD_CSI0_DAT15__UART5_RX_DATA	0x1b0b1
+				MX6QDL_PAD_CSI0_DAT18__UART5_RTS_B	0x1b0b1
+				MX6QDL_PAD_CSI0_DAT19__UART5_CTS_B	0x1b0b1
+				MX6QDL_PAD_EIM_A21__GPIO2_IO17		 0x15059 /*BT_EN*/
 			>;
 		};
 
@@ -717,6 +721,13 @@
 &uart4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart4>;
+	fsl,uart-has-rtscts;
+	status = "okay";
+};
+
+&uart5 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart5>;
 	fsl,uart-has-rtscts;
 	status = "okay";
 };
