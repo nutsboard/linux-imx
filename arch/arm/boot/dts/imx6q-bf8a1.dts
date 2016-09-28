@@ -1,0 +1,45 @@
+/*
+ * Copyright 2016 Wig Cheng, <onlywig@gmail.com>
+ * Copyright 2012=2015 Freescale Semiconductor, Inc.
+ * Copyright 2011 Linaro Ltd.
+ *
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
+ *
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+
+/dts-v1/;
+
+#include "imx6q.dtsi"
+#include "imx6qdl-bf8a1.dtsi"
+
+/ {
+	model = "Tailyn i.MX6 Quad BF8A1 Board";
+	compatible = "fsl,imx6q-bf8a1", "fsl,imx6q";
+};
+
+
+&ldb {
+	lvds-channel@0 {
+		crtc = "ipu2-di0";
+	};
+
+	lvds-channel@1 {
+		crtc = "ipu2-di1";
+	};
+};
+
+&mxcfb1 {
+	status = "okay";
+};
+
+&mxcfb2 {
+	status = "okay";
+};
+
+&sata {
+	status = "okay";
+};
