@@ -79,6 +79,21 @@
 			};
 	};
 
+
+	gpio-edm {
+		compatible = "gpio-edm";
+		gpio_5v1 {
+			label = "GPIO_5V1";
+			gpios = <&gpio2 19 1>;
+			dir   = "in";
+		};
+		gpio_5v2 {
+			label = "GPIO_5V2";
+			gpios = <&gpio5 4 1>;
+			dir   = "in";
+		};
+	};
+
 	gpio-keys {
 		compatible = "gpio-keys";
 		pinctrl-names = "default";
@@ -437,6 +452,8 @@
 				MX6QDL_PAD_EIM_A16__GPIO2_IO22	0x80000000 /*touch reset*/
 				MX6QDL_PAD_NANDF_ALE__GPIO6_IO08	0x1b0b0 /*touch irq*/
 				MX6QDL_PAD_GPIO_7__GPIO1_IO07	0x80000000 /*backlight pwr*/
+				MX6QDL_PAD_EIM_A19__GPIO2_IO19	0x80000000 /*gpio 5V_1*/
+				MX6QDL_PAD_EIM_A24__GPIO5_IO04	0x80000000 /*gpio 5V_2*/
 			>;
 		};
 
