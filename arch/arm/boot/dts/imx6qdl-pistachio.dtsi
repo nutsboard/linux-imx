@@ -247,8 +247,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet>;
 	phy-mode = "rgmii";
-	phy-reset-duration = <2>;
-	phy-reset-gpios = <&gpio2 18 0>;
+	/delete-property/ phy-reset-gpios;
 	status = "okay";
 };
 
