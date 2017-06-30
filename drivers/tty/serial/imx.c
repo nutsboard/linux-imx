@@ -2104,6 +2104,13 @@ static int serial_imx_probe_dt(struct imx_port *sport,
 			dev_err(&pdev->dev, "can't request gpio %d(%d)", gpio, ret);
 			break;
 		}
+
+		ret = gpio_export(gpio, true);
+		if (ret) {
+			dev_err(&pdev->dev, "can't export rs485 control gpio %d(%d)", gpio, ret);
+			break;
+		}
+
 		sport->gpios[i] = gpio;
 		gpios_mask |= (1 << i);
 	}
