@@ -234,8 +234,8 @@
 };
 
 &cpu0 {
-	arm-supply = <&sw1a_reg>;
-	soc-supply = <&sw1c_reg>;
+	arm-supply = <&reg_arm>;
+	soc-supply = <&reg_soc>;
 };
 
 &clks {
@@ -252,7 +252,8 @@
 };
 
 &gpc {
-	fsl,ldo-bypass = <1>;
+	fsl,ldo-bypass = <0>;
+	status = "okay";
 };
 
 &hdmi_audio {
@@ -863,12 +864,12 @@
 };
 
 &wdog1 {
-	status = "disabled";
+	status = "okay";
 };
 
 &wdog2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_wdog>;
 	fsl,wdog_b;
-	status = "okay";
+	status = "disabled";
 };
