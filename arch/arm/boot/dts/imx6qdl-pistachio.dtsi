@@ -35,13 +35,13 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-
-		reg_audio: regulator@0 {
+		reg_1p8v: regulator@0 {
 			compatible = "regulator-fixed";
 			reg = <0>;
-			regulator-name = "wm8962-supply";
-			gpio = <&gpio4 10 0>;
-			enable-active-high;
+			regulator-name = "1P8V";
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
+			regulator-always-on;
 		};
 
 		reg_3p3v: regulator@1 {
@@ -77,11 +77,30 @@
 			enable-active-high;
 			vin-supply = <&swbst_reg>;
 			};
+
+		reg_2p5v: regulator@4 {
+			compatible = "regulator-fixed";
+			reg = <4>;
+			regulator-name = "2P5V";
+			regulator-min-microvolt = <2500000>;
+			regulator-max-microvolt = <2500000>;
+			regulator-always-on;
+		};
 	};
 
 
 	gpio-edm {
 		compatible = "gpio-edm";
+		aud_pwr {
+			label = "AUD_PWR";
+			gpios = <&gpio4 10 1>;
+			dir   = "out";
+		};
+		hp_det {
+			label = "HP_DET";
+			gpios = <&gpio7 8 0>;
+			dir   = "in";
+		};
 		gpio_5v1 {
 			label = "GPIO_5V1";
 			gpios = <&gpio2 19 1>;
@@ -121,29 +140,17 @@
 	};
 
 	sound {
-		compatible = "fsl,imx6q-sabresd-wm8962",
-			   "fsl,imx-audio-wm8962";
-		model = "wm8962-audio";
-		cpu-dai = <&ssi2>;
+		compatible = "fsl,imx-sgtl5000",
+			   "fsl,imx-audio-sgtl5000";
+		model = "audio-sgtl5000";
+		ssi-controller = <&ssi1>;
 		audio-codec = <&codec>;
-		asrc-controller = <&asrc>;
 		audio-routing =
-			"Headphone Jack", "HPOUTL",
-			"Headphone Jack", "HPOUTR",
-			"Ext Spk", "SPKOUTL",
-			"Ext Spk", "SPKOUTR",
-			"AMIC", "MICBIAS",
-			"IN3R", "AMIC",
-			"DMIC", "MICBIAS",
-			"DMICDAT", "DMIC",
-			"CPU-Playback", "ASRC-Playback",
-			"Playback", "CPU-Playback",
-			"ASRC-Capture", "CPU-Capture",
-			"CPU-Capture", "Capture";
-		mux-int-port = <2>;
+			"MIC_IN", "Mic Jack",
+			"Mic Jack", "Mic Bias",
+			"Headphone Jack", "HP_OUT";
+		mux-int-port = <1>;
 		mux-ext-port = <3>;
-		hp-det-gpios = <&gpio7 8 1>;
-		mic-det-gpios = <&gpio1 9 1>;
 	};
 
 	sound-hdmi {
@@ -284,28 +291,16 @@
 	pinctrl-0 = <&pinctrl_i2c1>;
 	status = "okay";
 
-	codec: wm8962@1a {
-		compatible = "wlf,wm8962";
-		reg = <0x1a>;
+	codec: sgtl5000@0a {
+		compatible = "fsl,sgtl5000";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_i2c1_sgtl5000>;
+		reg = <0x0a>;
 		clocks = <&clks IMX6QDL_CLK_CKO>;
-		DCVDD-supply = <&reg_audio>;
-		DBVDD-supply = <&reg_audio>;
-		AVDD-supply = <&reg_audio>;
-		CPVDD-supply = <&reg_audio>;
-		MICVDD-supply = <&reg_audio>;
-		PLLVDD-supply = <&reg_audio>;
-		SPKVDD1-supply = <&reg_audio>;
-		SPKVDD2-supply = <&reg_audio>;
-		gpio-cfg = <
-			0x0000 /* 0:Default */
-			0x0000 /* 1:Default */
-			0x0013 /* 2:FN_DMICCLK */
-			0x0000 /* 3:Default */
-			0x8014 /* 4:FN_DMICCDAT */
-			0x0000 /* 5:Default */
-		>;
-		amic-mono;
-       };
+		VDDA-supply = <&reg_1p8v>;
+		VDDIO-supply = <&reg_1p8v>;
+	};
+
 };
 
 &i2c2 {
@@ -442,11 +437,9 @@
 	imx6qdl-pistachio {
 		pinctrl_hog: hoggrp {
 			fsl,pins = <
-				MX6QDL_PAD_GPIO_0__CCM_CLKO1    0x130b0
 				MX6QDL_PAD_EIM_D22__GPIO3_IO22  0x80000000  /*pcie power*/
 				MX6QDL_PAD_EIM_A25__GPIO5_IO02 0x80000000   /*LCD power*/
 				MX6QDL_PAD_EIM_D16__GPIO3_IO16 0x80000000   /*backlight power*/
-				MX6QDL_PAD_SD3_RST__GPIO7_IO08	0x80000000  /*headphone det*/
 				MX6QDL_PAD_GPIO_2__GPIO1_IO02    0x80000000 /*SD3 CD pin*/
 				MX6QDL_PAD_KEY_COL2__GPIO4_IO10	0x80000000 /*codec power*/
 				MX6QDL_PAD_EIM_A16__GPIO2_IO22	0x80000000 /*touch reset*/
@@ -457,6 +450,14 @@
 				MX6QDL_PAD_NANDF_CLE__GPIO6_IO07	0x80000000 /*AUX_5V_EN*/
 				MX6QDL_PAD_NANDF_WP_B__GPIO6_IO09	0x80000000 /*AUX_5VB_EN*/
 				MX6QDL_PAD_NANDF_RB0__GPIO6_IO10	0x80000000 /*AUX_3V3_EN*/
+			>;
+		};
+
+		pinctrl_i2c1_sgtl5000: i2c1-sgtl5000grp {
+			fsl,pins = <
+				MX6QDL_PAD_GPIO_0__CCM_CLKO1			0x000b0 /* sys_mclk */
+				MX6QDL_PAD_SD3_RST__GPIO7_IO08		0x130b0 /*headphone det*/
+				MX6QDL_PAD_GPIO_8__GPIO1_IO08			0x130b0 /*microphone det*/
 			>;
 		};
 
@@ -759,7 +760,7 @@
 	status = "okay";
 };
 
-&ssi2 {
+&ssi1 {
 	status = "okay";
 };
 
