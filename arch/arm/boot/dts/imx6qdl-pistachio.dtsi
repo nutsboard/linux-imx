@@ -103,12 +103,22 @@
 		};
 		gpio_5v1 {
 			label = "GPIO_5V1";
-			gpios = <&gpio2 19 1>;
+			gpios = <&gpio7 11 1>;
 			dir   = "in";
 		};
 		gpio_5v2 {
 			label = "GPIO_5V2";
+			gpios = <&gpio2 19 1>;
+			dir   = "in";
+		};
+		gpio_5v3 {
+			label = "GPIO_5V3";
 			gpios = <&gpio5 4 1>;
+			dir   = "in";
+		};
+		gpio_5v4 {
+			label = "GPIO_5V4";
+			gpios = <&gpio7 12 1>;
 			dir   = "in";
 		};
 	};
@@ -445,8 +455,10 @@
 				MX6QDL_PAD_EIM_A16__GPIO2_IO22	0x80000000 /*touch reset*/
 				MX6QDL_PAD_NANDF_ALE__GPIO6_IO08	0x1b0b0 /*touch irq*/
 				MX6QDL_PAD_GPIO_7__GPIO1_IO07	0x80000000 /*backlight pwr*/
-				MX6QDL_PAD_EIM_A19__GPIO2_IO19	0x80000000 /*gpio 5V_1*/
-				MX6QDL_PAD_EIM_A24__GPIO5_IO04	0x80000000 /*gpio 5V_2*/
+				MX6QDL_PAD_GPIO_16__GPIO7_IO11	0x80000000 /*gpio 5V_1*/
+				MX6QDL_PAD_EIM_A19__GPIO2_IO19	0x80000000 /*gpio 5V_2*/
+				MX6QDL_PAD_EIM_A24__GPIO5_IO04	0x80000000 /*gpio 5V_3*/
+				MX6QDL_PAD_GPIO_17__GPIO7_IO12	0x80000000 /*gpio 5V_4*/
 				MX6QDL_PAD_NANDF_CLE__GPIO6_IO07	0x80000000 /*AUX_5V_EN*/
 				MX6QDL_PAD_NANDF_WP_B__GPIO6_IO09	0x80000000 /*AUX_5VB_EN*/
 				MX6QDL_PAD_NANDF_RB0__GPIO6_IO10	0x80000000 /*AUX_3V3_EN*/
