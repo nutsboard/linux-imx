@@ -640,6 +640,13 @@
 			>;
 		};
 
+		pinctrl_flexcan2: flexcan2grp {
+			fsl,pins = <
+				MX6QDL_PAD_KEY_COL4__FLEXCAN2_TX 0x80000000
+				MX6QDL_PAD_KEY_ROW4__FLEXCAN2_RX 0x80000000
+			>;
+		};
+
 		pinctrl_usbotg: usbotggrp {
 			fsl,pins = <
 				MX6QDL_PAD_ENET_RX_ER__USB_OTG_ID	0x17059
@@ -876,4 +883,10 @@
 	pinctrl-0 = <&pinctrl_wdog>;
 	fsl,wdog_b;
 	status = "disabled";
+};
+
+&can2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_flexcan2>;
+	status = "okay";
 };
