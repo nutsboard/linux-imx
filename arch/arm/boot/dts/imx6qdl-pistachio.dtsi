@@ -120,7 +120,7 @@
 
 		power {
 			label = "Power Button";
-			gpios = <&gpio3 31 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
 			gpio-key,wakeup;
 			linux,code = <KEY_POWER>;
 		};
@@ -514,7 +514,7 @@
 
 		pinctrl_gpio_keys: gpio_keysgrp {
 			fsl,pins = <
-				MX6QDL_PAD_EIM_D31__GPIO3_IO31 0x1b0b0
+				MX6QDL_PAD_SD4_DAT4__GPIO2_IO12 0x1b0b0
 			>;
 		};
 
