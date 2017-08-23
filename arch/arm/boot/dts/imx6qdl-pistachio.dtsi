@@ -101,6 +101,11 @@
 			gpios = <&gpio7 8 0>;
 			dir   = "in";
 		};
+		i2c_exp_pwr {
+			label = "I2C_EXP_PWR";
+			gpios = <&gpio3 21 0>;
+			dir   = "out";
+		};
 		gpio_5v1 {
 			label = "GPIO_5V1";
 			gpios = <&gpio7 11 1>;
@@ -474,6 +479,7 @@
 				MX6QDL_PAD_NANDF_CLE__GPIO6_IO07	0x80000000 /*AUX_5V_EN*/
 				MX6QDL_PAD_NANDF_WP_B__GPIO6_IO09	0x80000000 /*AUX_5VB_EN*/
 				MX6QDL_PAD_NANDF_RB0__GPIO6_IO10	0x80000000 /*AUX_3V3_EN*/
+				MX6QDL_PAD_EIM_D21__GPIO3_IO21	0x80000000 /*I2C expander pwr*/
 			>;
 		};
 
