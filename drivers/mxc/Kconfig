@@ -13,11 +13,33 @@ config MXC_IPU
 
 source "drivers/mxc/mlb/Kconfig"
 source "drivers/mxc/ipu3/Kconfig"
-source "drivers/mxc/gpu-viv/Kconfig"
 source "drivers/mxc/sim/Kconfig"
 source "drivers/mxc/mipi/Kconfig"
 source "drivers/mxc/vpu/Kconfig"
 source "drivers/mxc/hdmi-cec/Kconfig"
+
+config MXC_GPU_VIV
+    depends on SOC_IMX6Q
+    tristate "MXC Vivante GPU support"
+    ---help---
+     Say Y to get the GPU driver support.
+
+choice
+    depends on MXC_GPU_VIV
+    bool "GPU Driver version"
+    default MXC_GPU_VIV_5_0_11_P86
+
+    help
+    Select the GPU driver version that matches your userland libraries
+
+config MXC_GPU_VIV_5_0_11_P86
+    bool "v5.0.11.p8.6"
+
+config MXC_GPU_VIV_5_0_11_P74
+    bool "v5.0.11.p7.4"
+
+endchoice
+
 
 endmenu
 
