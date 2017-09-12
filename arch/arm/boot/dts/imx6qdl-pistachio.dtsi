@@ -126,6 +126,11 @@
 			gpios = <&gpio7 12 1>;
 			dir   = "in";
 		};
+		touch_sel {
+			label = "TOUCH_SEL";
+			gpios = <&gpio2 20 0>;
+			dir   = "out";
+		};
 	};
 
 	gpio-keys {
@@ -480,6 +485,7 @@
 				MX6QDL_PAD_NANDF_WP_B__GPIO6_IO09	0x80000000 /*AUX_5VB_EN*/
 				MX6QDL_PAD_NANDF_RB0__GPIO6_IO10	0x80000000 /*AUX_3V3_EN*/
 				MX6QDL_PAD_EIM_D21__GPIO3_IO21	0x80000000 /*I2C expander pwr*/
+				MX6QDL_PAD_EIM_A18__GPIO2_IO20	0x1b0b0 /*touch select*/
 			>;
 		};
 
