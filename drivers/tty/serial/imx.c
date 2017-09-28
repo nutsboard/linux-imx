@@ -239,14 +239,14 @@ struct imx_port {
 
 	struct mctrl_gpios *gpios;
 
-	unsigned 		gpios_mask;
 	unsigned		txen_mask;
 	unsigned		txen_levels;
 	unsigned		txing;
 	unsigned		rxing;
 	struct delayed_work	rxact_work;
 
-	int			gpios[32];
+	int			act_gpios[32];
+	unsigned 		act_gpios_mask;
 	unsigned		off_levels;
 	unsigned		rxact_mask;
 	unsigned		rxact_levels;
@@ -393,6 +393,18 @@ static void imx_port_rts_auto(struct imx_port *sport, unsigned long *ucr2)
 	*ucr2 |= UCR2_CTSC;
 }
 
+static void imx_set_gpios(struct imx_port *sport, unsigned mask, unsigned levels, unsigned ascending)
+{
+	unsigned *gpios = sport->act_gpios;
+
+	while (mask) {
+		int i = ascending ? __ffs(mask) : __fls(mask);
+
+		mask &= ~(1 << i);
+		gpio_set_value(gpios[i], (levels >> i) & 1);
+	}
+}
+
 /*
  * interrupts disabled on entry
  */
@@ -441,18 +453,6 @@ static void imx_stop_tx(struct uart_port *port)
 	if (sport->txing) {
 		sport->txing = 0;
 		imx_set_gpios(sport, sport->txen_mask, ~sport->txen_levels, 0);
-	}
-}
-
-void imx_set_gpios(struct imx_port *sport, unsigned mask, unsigned levels, unsigned ascending)
-{
-	unsigned *gpios = sport->gpios;
-
-	while (mask) {
-		int i = ascending ? __ffs(mask) : __fls(mask);
-
-		mask &= ~(1 << i);
-		gpio_set_value(gpios[i], (levels >> i) & 1);
 	}
 }
 
@@ -1352,7 +1352,7 @@ void imx_startup_gpios(struct imx_port *sport)
 		levels &= ~sport->txen_mask;
 		levels |= sport->txen_levels & sport->txen_mask;
 	}
-	imx_set_gpios(sport, sport->gpios_mask, levels, 1);
+	imx_set_gpios(sport, sport->act_gpios_mask, levels, 1);
 }
 
 /* half the RX buffer size */
@@ -1533,7 +1533,7 @@ static void imx_shutdown(struct uart_port *port)
 
 	clk_disable_unprepare(sport->clk_per);
 	clk_disable_unprepare(sport->clk_ipg);
-	imx_set_gpios(sport, sport->gpios_mask, sport->off_levels, 0);
+	imx_set_gpios(sport, sport->act_gpios_mask, sport->off_levels, 0);
 }
 
 static void imx_flush_buffer(struct uart_port *port)
@@ -2211,7 +2211,7 @@ static int serial_imx_probe_dt(struct imx_port *sport,
 	struct device_node *np = pdev->dev.of_node;
 	int ret, id;
 	int i, gpio;
-	int gpios_mask = 0;
+	int act_gpios_mask = 0;
 	u32 off_levels = 0;
 	char buf[64];
 
@@ -2236,8 +2236,8 @@ static int serial_imx_probe_dt(struct imx_port *sport,
 
 	of_property_read_u32(np, "off_levels", &off_levels);
 
-	for (i = 0 ; i < ARRAY_SIZE(sport->gpios); i++) {
-		sport->gpios[i] = -1;
+	for (i = 0 ; i < ARRAY_SIZE(sport->act_gpios); i++) {
+		sport->act_gpios[i] = -1;
 		gpio = of_get_named_gpio(np, "control-gpios", i);
 		if (gpio < 0)
 			break;
@@ -2253,37 +2253,37 @@ static int serial_imx_probe_dt(struct imx_port *sport,
 			dev_err(&pdev->dev, "can't request gpio %d(%d)", gpio, ret);
 			break;
 		}
-		sport->gpios[i] = gpio;
-		gpios_mask |= (1 << i);
+		sport->act_gpios[i] = gpio;
+		act_gpios_mask |= (1 << i);
 	}
-	sport->gpios_mask = gpios_mask;
-	sport->off_levels = off_levels & gpios_mask;
-	if (!gpios_mask)
+	sport->act_gpios_mask = act_gpios_mask;
+	sport->off_levels = off_levels & act_gpios_mask;
+	if (!act_gpios_mask)
 		return 0;
 	i = 0;
 	of_property_read_u32(np, "rxact_mask", &i);
-	sport->rxact_mask = i & gpios_mask;
+	sport->rxact_mask = i & act_gpios_mask;
 	i = 0;
 	of_property_read_u32(np, "rxact_levels", &i);
-	sport->rxact_levels = i & gpios_mask;
+	sport->rxact_levels = i & act_gpios_mask;
 	i = 0;
 	of_property_read_u32(np, "rs232_levels", &i);
-	sport->rs232_levels = i & gpios_mask;
+	sport->rs232_levels = i & act_gpios_mask;
 	i = 0;
 	of_property_read_u32(np, "rs232_txen_mask", &i);
-	sport->rs232_txen_mask = i & gpios_mask;
+	sport->rs232_txen_mask = i & act_gpios_mask;
 	i = 0;
 	of_property_read_u32(np, "rs232_txen_levels", &i);
-	sport->rs232_txen_levels = i & gpios_mask;
+	sport->rs232_txen_levels = i & act_gpios_mask;
 	i = 0;
 	of_property_read_u32(np, "rs485_levels", &i);
-	sport->rs485_levels = i & gpios_mask;
+	sport->rs485_levels = i & act_gpios_mask;
 	i = 0;
 	of_property_read_u32(np, "rs485_txen_mask", &i);
-	sport->rs485_txen_mask = i & gpios_mask;
+	sport->rs485_txen_mask = i & act_gpios_mask;
 	i = 0;
 	of_property_read_u32(np, "rs485_txen_levels", &i);
-	sport->rs485_txen_levels = i & gpios_mask;
+	sport->rs485_txen_levels = i & act_gpios_mask;
 	i = 0;
 	of_property_read_u32(np, "uart-has-rs485-half-duplex", &i);
 	sport->rs485_half_duplex = i ? 1 : 0;
@@ -2435,7 +2435,7 @@ static int serial_imx_probe(struct platform_device *pdev)
 	imx_ports[sport->port.line] = sport;
 
 	platform_set_drvdata(pdev, sport);
-	if (sport->gpios_mask) {
+	if (sport->act_gpios_mask) {
 		ret = device_create_file(&pdev->dev, &dev_attr_rs485_en);
 		if (ret < 0)
 			dev_warn(&pdev->dev, "cound not create sys node\n");
