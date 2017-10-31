@@ -131,6 +131,11 @@
 			gpios = <&gpio2 20 0>;
 			dir   = "out";
 		};
+		touch_pwr {
+			label = "TOUCH_PWR";
+			gpios = <&gpio2 27 1>;
+			dir   = "out";
+		};
 	};
 
 	gpio-keys {
@@ -486,6 +491,7 @@
 				MX6QDL_PAD_NANDF_RB0__GPIO6_IO10	0x1b0b1 /*AUX_3V3_EN*/
 				MX6QDL_PAD_EIM_D21__GPIO3_IO21	((1<<30) | 0x1b0b1) /*I2C expander pwr*/
 				MX6QDL_PAD_EIM_A18__GPIO2_IO20	((1<<30) | 0x1b0b0) /*touch select*/
+				MX6QDL_PAD_EIM_LBA__GPIO2_IO27	((1<<30) | 0x1b0b0) /*touch pwr*/
 			>;
 		};
 
