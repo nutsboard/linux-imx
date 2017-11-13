@@ -337,7 +337,6 @@
 		VDDA-supply = <&reg_1p8v>;
 		VDDIO-supply = <&reg_1p8v>;
 	};
-
 };
 
 &i2c2 {
@@ -442,7 +441,6 @@
 				regulator-max-microvolt = <3300000>;
 				regulator-always-on;
 			};
-
 		};
 	};
 
@@ -457,6 +455,11 @@
 		interrupt-parent = <&gpio6>;
 		interrupts = <8 0x2>;
 	};
+
+	s35390a@30 {
+		compatible = "sii,s35390a";
+		reg = <0x30>;
+	};
 };
 
 &i2c3 {
@@ -464,7 +467,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c3>;
 	status = "okay";
-
 };
 
 &iomuxc {
