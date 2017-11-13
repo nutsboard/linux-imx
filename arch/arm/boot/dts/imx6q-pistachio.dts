@@ -18,7 +18,7 @@
 
 / {
 	model = "NutsBoard i.MX6 Quad Pistachio board";
-	compatible = "nutsboard,imx6q-bf8a1", "fsl,imx6q";
+	compatible = "nutsboard,imx6q-pistachio", "fsl,imx6q";
 };
 
 
