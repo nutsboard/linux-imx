@@ -19,6 +19,8 @@
 #include <linux/of_device.h>
 #include <linux/pinctrl/consumer.h>
 #include <linux/platform_device.h>
+#include <linux/i2c.h>
+#include <linux/mutex.h>
 
 #include "mxc_dispdrv.h"
 
@@ -33,9 +35,37 @@ struct mxc_lcdif_data {
 	struct mxc_dispdrv_handle *disp_lcdif;
 };
 
+struct edid_output {
+	u32 pclk;
+	u32 xres;
+	u32 yres;
+	u32 h_back;
+	u32 h_front;
+	u32 v_back;
+	u32 v_front;
+	u32 h_len;
+	u32 v_len;
+};
+
 #define DISPDRV_LCD	"lcd"
+#define EDID_LEN	(13)
+
+static DEFINE_MUTEX(edid_lock);
+static struct edid_output current_panel;
+static struct i2c_board_info __initdata vga_i2c_devices[] = {
+	[0] = {
+		.type = "vga_edid",
+		.addr = 0x50,
+	},
+};
 
 static struct fb_videomode lcdif_modedb[] = {
+	{
+	/* EDID-Auto Detection on VGA/DVI monitor */
+	"EDID-AUTO", 60, 800, 480, 37037, 40, 60, 10, 10, 20, 10,
+	FB_SYNC_CLK_LAT_FALL,
+	FB_VMODE_NONINTERLACED,
+	0,},
 	{
 	/* 800x480 @ 57 Hz , pixel clk @ 27MHz */
 	"CLAA-WVGA", 57, 800, 480, 37037, 40, 60, 10, 10, 20, 10,
@@ -60,6 +90,18 @@ static int lcdif_init(struct mxc_dispdrv_handle *disp,
 	struct mxc_lcd_platform_data *plat_data = dev->platform_data;
 	struct fb_videomode *modedb = lcdif_modedb;
 	int modedb_sz = lcdif_modedb_sz;
+
+	if(current_panel.xres <= 1920 && current_panel.yres <= 1080) {
+		lcdif_modedb[0].xres = current_panel.xres;
+		lcdif_modedb[0].yres = current_panel.yres;
+		lcdif_modedb[0].pixclock = 1000000000/(current_panel.pclk*10);
+		lcdif_modedb[0].left_margin = current_panel.h_back;
+		lcdif_modedb[0].right_margin = current_panel.h_front;
+		lcdif_modedb[0].upper_margin = current_panel.v_back;
+		lcdif_modedb[0].lower_margin = current_panel.v_front;
+		lcdif_modedb[0].hsync_len = current_panel.h_len;
+		lcdif_modedb[0].vsync_len = current_panel.v_len;
+	}
 
 	/* use platform defined ipu/di */
 	ret = ipu_di_to_crtc(dev, plat_data->ipu_id,
@@ -205,6 +247,62 @@ static int mxc_lcdif_remove(struct platform_device *pdev)
 	kfree(lcdif);
 	return 0;
 }
+
+static const struct i2c_device_id edid_id[] = {
+	{.name = "vga_edid", 0 },
+	{ },
+};
+MODULE_DEVICE_TABLE(i2c, edid_id);
+
+int edid_i2c_probe(struct i2c_client *i2c_dev,const struct i2c_device_id *id)
+{
+	u32 ret, h_blank=0, v_blank=0;
+	u8 get_edid[EDID_LEN]={0};
+	u8 i;
+
+	if(!i2c_check_functionality(i2c_dev->adapter,I2C_FUNC_I2C))
+		return ENODEV;
+
+	struct i2c_adapter *adapter = to_i2c_adapter(i2c_dev);
+
+	mutex_lock(&edid_lock);
+
+	for(i=0x36;i<(0x36+EDID_LEN);i++)
+		get_edid[i-0x36] = i2c_smbus_read_byte_data(i2c_dev,i);
+
+	mutex_unlock(&edid_lock);
+
+	current_panel.pclk = 0x0000 | (get_edid[1] << 8) | get_edid[0];
+	current_panel.xres = 0x000 | ((get_edid[4] >> 4) << 8) | get_edid[2];
+	current_panel.yres = 0x000 | ((get_edid[7] >> 4) << 8) | get_edid[5];
+	h_blank = 0x000 | ((get_edid[4] & 0x0f) << 8) | get_edid[3];
+	v_blank = 0x000 | ((get_edid[7] & 0x0f) << 8) | get_edid[6];
+	current_panel.h_front = 0x000 | ((get_edid[11] & 0xc0) << 2) | get_edid[8];
+	current_panel.h_len = 0x000 | ((get_edid[11] & 0x30) << 4) | get_edid[9];
+	current_panel.v_front = 0x00 | ((get_edid[11] & 0x0c) << 2) | ((get_edid[10] & 0xf0) >> 4);
+	current_panel.v_len = 0x00 | ((get_edid[11] & 0x03) << 4) | (get_edid[10] & 0x0f);
+	current_panel.h_back = h_blank - current_panel.h_front - current_panel.h_len;
+	current_panel.v_back = v_blank - current_panel.v_front - current_panel.v_len;
+
+	return 0;
+}
+
+static struct i2c_driver edid_i2c_driver = {
+	.driver = {
+		.name = "edid-read",
+		.owner = THIS_MODULE,
+	},
+	.probe = edid_i2c_probe,
+	.id_table = edid_id,
+};
+
+static int __init edid_i2c_init(void)
+{
+	i2c_register_board_info(2,vga_i2c_devices,ARRAY_SIZE(vga_i2c_devices));
+	return i2c_add_driver(&edid_i2c_driver);
+}
+
+subsys_initcall(edid_i2c_init);
 
 static const struct of_device_id imx_lcd_dt_ids[] = {
 	{ .compatible = "fsl,lcd"},
