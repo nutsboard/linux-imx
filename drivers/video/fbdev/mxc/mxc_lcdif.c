@@ -51,7 +51,7 @@ struct edid_output {
 #define EDID_LEN	(13)
 
 static DEFINE_MUTEX(edid_lock);
-static struct edid_output current_panel;
+static struct edid_output current_panel={0};
 static struct i2c_board_info __initdata vga_i2c_devices[] = {
 	[0] = {
 		.type = "vga_edid",
@@ -256,14 +256,12 @@ MODULE_DEVICE_TABLE(i2c, edid_id);
 
 int edid_i2c_probe(struct i2c_client *i2c_dev,const struct i2c_device_id *id)
 {
-	u32 ret, h_blank=0, v_blank=0;
+	u32 h_blank=0, v_blank=0;
 	u8 get_edid[EDID_LEN]={0};
 	u8 i;
 
 	if(!i2c_check_functionality(i2c_dev->adapter,I2C_FUNC_I2C))
 		return ENODEV;
-
-	struct i2c_adapter *adapter = to_i2c_adapter(i2c_dev);
 
 	mutex_lock(&edid_lock);
 
