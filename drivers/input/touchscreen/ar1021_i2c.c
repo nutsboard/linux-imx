@@ -30,6 +30,7 @@ static irqreturn_t ar1021_i2c_irq(int irq, void *dev_id)
 	struct input_dev *input = ar1021->input;
 	u8 *data = ar1021->data;
 	unsigned int x, y, button;
+	unsigned int ix, iy;
 	int retval;
 
 	retval = i2c_master_recv(ar1021->client,
@@ -45,8 +46,11 @@ static irqreturn_t ar1021_i2c_irq(int irq, void *dev_id)
 	x = ((data[2] & 0x1f) << 7) | (data[1] & 0x7f);
 	y = ((data[4] & 0x1f) << 7) | (data[3] & 0x7f);
 
-	input_report_abs(input, ABS_X, x);
-	input_report_abs(input, ABS_Y, y);
+	ix = x; iy = y;
+	input_dev_calibrate(input, &ix, &iy, AR1021_MAX_X, AR1021_MAX_Y );
+
+	input_report_abs(input, ABS_X, ix);
+	input_report_abs(input, ABS_Y, iy);
 	input_report_key(input, BTN_TOUCH, button);
 	input_sync(input);
 
