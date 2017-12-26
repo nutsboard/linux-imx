@@ -17,7 +17,7 @@
 #include "imx6qdl-pistachio.dtsi"
 
 / {
-	model = "NutsBoard i.MX6 Quad Pistachio board";
+	model = "NutsBoard i.MX6 Dual Pistachio-Lite board";
 	compatible = "nutsboard,imx6q-nutsboard-lite", "fsl,imx6q";
 };
 
