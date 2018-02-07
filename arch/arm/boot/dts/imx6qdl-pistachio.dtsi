@@ -454,6 +454,11 @@
 		interrupt-parent = <&gpio6>;
 		interrupts = <8 0x2>;
 	};
+
+	s35390a@30 {
+		compatible = "sii,s35390a";
+		reg = <0x30>;
+	};
 };
 
 &i2c3 {
