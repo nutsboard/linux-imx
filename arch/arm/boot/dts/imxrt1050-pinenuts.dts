@@ -1,0 +1,720 @@
+/*
+ * Copyright (C) 2018 NutsBoard.Org
+ *
+ * Author: Wig Cheng <onlywig@gmail.com>
+ *
+ * This file is dual-licensed: you can use it either under the terms
+ * of the GPL or the X11 license, at your option. Note that this dual
+ * licensing only applies to this file, and not this project as a
+ * whole.
+ *
+ *  a) This file is free software; you can redistribute it and/or
+ *     modify it under the terms of the GNU General Public License as
+ *     published by the Free Software Foundation; either version 2 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This file is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ * Or, alternatively,
+ *
+ *  b) Permission is hereby granted, free of charge, to any person
+ *     obtaining a copy of this software and associated documentation
+ *     files (the "Software"), to deal in the Software without
+ *     restriction, including without limitation the rights to use,
+ *     copy, modify, merge, publish, distribute, sublicense, and/or
+ *     sell copies of the Software, and to permit persons to whom the
+ *     Software is furnished to do so, subject to the following
+ *     conditions:
+ *
+ *     The above copyright notice and this permission notice shall be
+ *     included in all copies or substantial portions of the Software.
+ *
+ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ *     OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+/dts-v1/;
+
+#include "armv7-m.dtsi"
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/gpio/gpio.h>
+#include "imxrt105x-pinfunc.h"
+
+/ {
+	model = "NXP IMXRT1050 board";
+	compatible = "nxp,imxrt1050-evk", "nxp,imxrt105x";
+
+	memory {
+		device_type = "memory";
+		reg = <0x80000000 0x02000000>;
+	};
+
+	dmamem {
+		compatible = "dmamem";
+		base-addr = <0x81f00000>;
+		full-size = <0x100000>;
+		fb-size = <0x80000>;
+	};
+
+	aliases {
+		pit0 = &pit;
+		gpio0 = &gpio1;
+		gpio1 = &gpio2;
+		gpio2 = &gpio3;
+		gpio3 = &gpio4;
+		gpio4 = &gpio5;
+		serial0 = &uart0;
+		esdhc0 = &esdhc0;
+		esdhc1 = &esdhc1;
+		i2c0 = &lpi2c1;
+	};
+
+	core_clk: core_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <600000000>;
+	};
+
+	ipg_clk: ipg_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <150000000>;
+	};
+
+	periph_clk: periph_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <75000000>;
+	};
+
+	uart_clk: uart_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <6000000>;
+	};
+
+	osc_clk: osc_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <24000000>;
+	};
+
+	dmac_clk: dmac_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <150000000>;
+	};
+
+	dmamux_clk: dmamux_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <150000000>;
+	};
+
+	enet_clk: enet_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <150000000>;
+	};
+
+	rmii_clk: rmii_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <50000000>;
+	};
+
+	usdhc_clk: usdhc_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <49500000>;
+	};
+
+	usb_clk: usb_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <480000000>;
+	};
+
+	usbphy_clk: usbphy_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <480000000>;
+	};
+
+	lcdif_clk: lcdif_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <9300000>;
+	};
+
+	lpi2c_clk: lpi2c_clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <6000000>;
+	};
+
+	soc {
+		aips0: aips-bus@40000000 {
+			compatible = "fsl,aips-bus", "simple-bus";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges;
+
+			pit: pit@40084000 {
+				compatible = "fsl,vf610-pit";
+				reg = <0x40084000 0x1000>;
+				interrupts = <122>;
+				clocks = <&periph_clk>;
+				clock-names = "pit";
+				pit_cnt = <4>;
+			};
+
+			edma: dma-controller@40008000 {
+				compatible = "fsl,kinetis-edma";
+				reg = <0x400E8000 0x2000>, /* DMAC */
+					<0x400EC000 0x1000>; /* DMAMUX0 */
+				#dma-cells = <2>;
+				dma-channels = <32>;
+				interrupts = <0>,  <1>,  <2>,  <3>,
+					<4>,  <5>,  <6>,  <7>,
+					<8>,  <9>, <10>, <11>,
+					<12>, <13>, <14>, <15>,
+					<16>;
+				interrupt-names = "edma-tx-0,16",
+					"edma-tx-1,17",
+					"edma-tx-2,18",
+					"edma-tx-3,19",
+					"edma-tx-4,20",
+					"edma-tx-5,21",
+					"edma-tx-6,22",
+					"edma-tx-7,23",
+					"edma-tx-8,24",
+					"edma-tx-9,25",
+					"edma-tx-10,26",
+					"edma-tx-11,27",
+					"edma-tx-12,28",
+					"edma-tx-13,29",
+					"edma-tx-14,30",
+					"edma-tx-15,31",
+					"edma-err";
+				clocks = <&dmac_clk>, <&dmamux_clk>;
+				clock-names = "edma", "dmamux0";
+			};
+
+			ana: ana@400d8000 {
+				compatible = "fsl,imx6sx-anatop";
+				reg = <0x400d8000 0x200>;
+			};
+
+			ccm: ccm@400fc000 {
+				compatible = "fsl,imx6sx-ccm";
+				reg = <0x400fc000 0x100>;
+			};
+
+			iomuxc: iomuxc@401f8000 {
+				compatible = "fsl,imxrt105x-iomuxc";
+				reg = <0x401f8000 0x4000>;
+			};
+
+			gpio1: gpio@401b8000 {
+				compatible = "fsl,imxrt105x-gpio";
+				reg = <0x401b8000 0x1000>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupts = <80>, <81>;
+				interrupt-controller;
+				#interrupt-cells = <2>;
+				gpio-ranges = <&iomuxc 0 0 32>;
+			};
+
+			gpio2: gpio@401bc000 {
+				compatible = "fsl,imxrt105x-gpio";
+				reg = <0x401bc000 0x1000>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupts = <82>, <83>;
+				interrupt-controller;
+				#interrupt-cells = <2>;
+				gpio-ranges = <&iomuxc 0 32 32>;
+			};
+
+			gpio3: gpio@401c0000 {
+				compatible = "fsl,imxrt105x-gpio";
+				reg = <0x401c0000 0x1000>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupts = <84>, <85>;
+				interrupt-controller;
+				#interrupt-cells = <2>;
+				gpio-ranges = <&iomuxc 0 64 32>;
+			};
+
+			gpio4: gpio@401c4000 {
+				compatible = "fsl,imxrt105x-gpio";
+				reg = <0x401c4000 0x1000>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupts = <86>, <87>;
+				interrupt-controller;
+				#interrupt-cells = <2>;
+				gpio-ranges = <&iomuxc 0 96 32>;
+			};
+
+			gpio5: gpio@400c0000 {
+				compatible = "fsl,imxrt105x-gpio";
+				reg = <0x400c0000 0x1000>;
+				gpio-controller;
+				#gpio-cells = <2>;
+				interrupts = <88>, <89>;
+				interrupt-controller;
+				#interrupt-cells = <2>;
+				gpio-ranges = <&iomuxc 0 128 14>;
+			};
+
+			uart0: serial@40184000 {
+				compatible = "fsl,imxrt1050-lpuart";
+				reg = <0x40184000 0x1000>;
+				interrupts = <20>;
+				clocks = <&uart_clk>;
+				clock-names = "ipg";
+				dmas = <&edma 0 2>,
+					<&edma 0 3>;
+				dma-names = "rx","tx";
+				status = "disabled";
+			};
+
+			fec: ethernet@402d8000 {
+				compatible = "fsl,imxrt105x-fec";
+				reg = <0x402d8000 0x1000>;
+				interrupts = <114>;
+				clocks = <&enet_clk>,
+					<&enet_clk>,
+					<&enet_clk>;
+				clock-names = "ipg", "ahb", "ptp";
+				status = "disabled";
+			};
+
+			esdhc0: esdhc@402c0000 {
+				compatible = "fsl,imxrt105x-usdhc";
+				reg = <0x402c0000 0x1000>;
+				interrupts = <110>;
+				clocks = <&ipg_clk>,
+					<&ipg_clk>,
+					<&usdhc_clk>;
+				clock-names = "ipg", "ahb", "per";
+				bus-width = <4>;
+				status = "disabled";
+			};
+
+			esdhc1: esdhc@402c4000 {
+				compatible = "fsl,imxrt105x-usdhc";
+				reg = <0x402c4000 0x1000>;
+				interrupts = <111>;
+				clocks = <&ipg_clk>,
+					<&ipg_clk>,
+					<&usdhc_clk>;
+				clock-names = "ipg", "ahb", "per";
+				bus-width = <4>;
+				status = "disabled";
+			};
+
+			usbphy1: usbphy@400d9000 {
+				compatible = "fsl,imxrt105x-usbphy", "fsl,imx23-usbphy";
+				reg = <0x400d9000 0x1000>;
+				interrupts = <65>;
+				clocks = <&usbphy_clk>;
+			};
+
+			usbphy2: usbphy@400da000 {
+				compatible = "fsl,imxrt105x-usbphy", "fsl,imx23-usbphy";
+				reg = <0x400da000 0x1000>;
+				interrupts = <66>;
+				clocks = <&usbphy_clk>;
+			};
+
+			usbotg1: usb@402e0000 {
+				compatible = "fsl,imxrt105x-usb", "fsl,imx27-usb";
+				reg = <0x402e0000 0x200>;
+				interrupts = <113>;
+				clocks = <&usb_clk>;
+				fsl,usbphy = <&usbphy1>;
+				fsl,usbmisc = <&usbmisc 0>;
+				ahb-burst-config = <0x0>;
+				tx-burst-size-dword = <0x10>;
+				rx-burst-size-dword = <0x10>;
+				status = "disabled";
+			};
+
+			usbotg2: usb@402e0200 {
+				compatible = "fsl,imxrt105x-usb", "fsl,imx27-usb";
+				reg = <0x402e0200 0x200>;
+				interrupts = <112>;
+				clocks = <&usb_clk>;
+				fsl,usbphy = <&usbphy2>;
+				fsl,usbmisc = <&usbmisc 1>;
+				ahb-burst-config = <0x0>;
+				tx-burst-size-dword = <0x10>;
+				rx-burst-size-dword = <0x10>;
+				status = "disabled";
+			};
+
+			usbmisc: usbmisc@402e0800 {
+				#index-cells = <1>;
+				compatible = "fsl,imxrt105x-usbmisc", "fsl,imx6q-usbmisc";
+				reg = <0x402e0800 0x200>;
+				clocks = <&usb_clk>;
+			};
+
+			lcdif: lcdif@402b8000 {
+				compatible = "fsl,imx28-lcdif";
+				reg = <0x402b8000 0x4000>;
+				interrupts = <42>;
+				clocks = <&lcdif_clk>;
+				clock-names = "pix";
+				status = "disabled";
+			};
+
+			lpi2c1: lpci2c@403f0000 {
+				compatible = "fsl,imx7ulp-lpi2c";
+				reg = <0x403f0000 0x4000>;
+				interrupts = <28>;
+				clocks = <&lpi2c_clk>;
+				status = "disabled";
+			};
+		};
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+		pinctrl-0 = <&pinctrl_gpio_key>;
+		pinctrl-names = "default";
+
+		button_0 {
+			label = "Button 0";
+			gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_A>;
+		};
+	};
+
+	gpio-edm {
+		compatible = "gpio-edm";
+		usb_otg2_en {
+			label = "USB_OTG2_EN";
+			gpios = <&gpio2 31 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio4 {
+			label = "RPI_GPIO4";
+			gpios = <&gpio1 24 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio5 {
+			label = "RPI_GPIO5";
+			gpios = <&gpio1 25 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio6 {
+			label = "RPI_GPIO6";
+			gpios = <&gpio1 26 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio7 {
+			label = "RPI_GPIO7";
+			gpios = <&gpio1 27 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio8 {
+			label = "RPI_GPIO8";
+			gpios = <&gpio1 18 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio9 {
+			label = "RPI_GPIO9";
+			gpios = <&gpio1 19 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio10 {
+			label = "RPI_GPIO10";
+			gpios = <&gpio1 20 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio11 {
+			label = "RPI_GPIO11";
+			gpios = <&gpio1 21 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio12 {
+			label = "RPI_GPIO12";
+			gpios = <&gpio1 28 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio13 {
+			label = "RPI_GPIO13";
+			gpios = <&gpio1 29 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio16 {
+			label = "RPI_GPIO16";
+			gpios = <&gpio1 30 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio17 {
+			label = "RPI_GPIO17";
+			gpios = <&gpio1 31 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio18 {
+			label = "RPI_GPIO18";
+			gpios = <&gpio1 4 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio19 {
+			label = "RPI_GPIO19";
+			gpios = <&gpio1 5 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio20 {
+			label = "RPI_GPIO20";
+			gpios = <&gpio1 14 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio21 {
+			label = "RPI_GPIO21";
+			gpios = <&gpio1 15 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio22 {
+			label = "RPI_GPIO22";
+			gpios = <&gpio1 6 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio23 {
+			label = "RPI_GPIO23";
+			gpios = <&gpio1 7 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio24 {
+			label = "RPI_GPIO24";
+			gpios = <&gpio1 8 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio25 {
+			label = "RPI_GPIO25";
+			gpios = <&gpio1 11 0>;
+			dir   = "out";
+		};
+
+		rpi_gpio27 {
+			label = "RPI_GPIO27";
+			gpios = <&gpio2 30 0>;
+			dir   = "out";
+		};
+
+	};
+};
+
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart0>;
+	status = "okay";
+};
+
+&fec {
+	phy-mode = "rmii";
+	phy-handle = <&ethphy0>;
+	status = "ok";
+
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		ethphy0: ethernet-phy@0 {
+			reg = <2>;
+			clocks = <&rmii_clk>;
+			clock-names = "rmii-ref";
+		};
+	};
+};
+
+&esdhc0 {
+	status = "ok";
+};
+
+&esdhc1 {
+	non-removable;
+	status = "ok";
+};
+
+&usbotg1 {
+	dr_mode = "otg";
+	status = "okay";
+	disable-over-current;
+};
+
+&usbotg2 {
+	dr_mode = "host";
+	status = "okay";
+	disable-over-current;
+};
+
+&lcdif {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lcdif>;
+	display = <&display0>;
+	status = "okay";
+	data-swizzle;
+
+	imx-ana-init = "fsl,imx6sx-anatop";
+	imx-ccm-init = "fsl,imx6sx-ccm";
+
+	display0: display0 {
+		bits-per-pixel = <16>;
+		bus-width = <16>;
+
+		display-timings {
+			native-mode = <&timing0>;
+			timing0: timing0 {
+				clock-frequency = <9300000>;
+				hactive = <480>;
+				vactive = <272>;
+				hback-porch = <8>;
+				hfront-porch = <4>;
+				vback-porch = <2>;
+				vfront-porch = <4>;
+				hsync-len = <41>;
+				vsync-len = <10>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <1>;
+				pixelclk-active = <0>;
+			};
+		};
+	};
+};
+
+#define MXRT105X_PAD_CFG_LCD 0x79/* 0x1b0b0 */
+#define MXRT105X_PAD_CFG_I2C	0x4001b8b1
+
+&iomuxc {
+	pinctrl_uart0: uart0grp {
+		fsl,pins = <
+			MXRT105X_PAD_AD_B0_12_LPUART1_TX	MXRT105X_PAD_CFG_UART
+			MXRT105X_PAD_AD_B0_13_LPUART1_RX	MXRT105X_PAD_CFG_UART
+		>;
+	};
+	pinctrl_lcdif: lcdifgrp {
+		fsl,pins = <
+			MXRT105X_PAD_B0_00_LCD_CLK	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_01_LCD_ENABLE	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_02_LCD_HSYNC	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_03_LCD_VSYNC	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_04_LCD_DATA00	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_05_LCD_DATA01	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_06_LCD_DATA02	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_07_LCD_DATA03	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_08_LCD_DATA04	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_09_LCD_DATA05	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_10_LCD_DATA06	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_11_LCD_DATA07	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_12_LCD_DATA08	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_13_LCD_DATA09	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_14_LCD_DATA10	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B0_15_LCD_DATA11	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B1_00_LCD_DATA12	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B1_01_LCD_DATA13	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B1_02_LCD_DATA14	MXRT105X_PAD_CFG_LCD
+			MXRT105X_PAD_B1_03_LCD_DATA15	MXRT105X_PAD_CFG_LCD
+		>;
+	};
+	pinctrl_gpio: gpiogrp {
+		fsl,pins = <
+			MXRT105X_PAD_AD_B0_01_GPIO1_IO01	MXRT105X_PAD_CFG_GPIO
+		>;
+	};
+
+	pinctrl_gpio_key: gpiokeygrp {
+		fsl,pins = <
+			MXRT105X_PAD_AD_B0_00_GPIO1_IO00	MXRT105X_PAD_CFG_GPIO
+			MXRT105X_PAD_B1_15_GPIO2_IO31			MXRT105X_PAD_CFG_GPIO
+
+			MXRT105X_PAD_AD_B1_08_GPIO1_IO24	MXRT105X_PAD_CFG_GPIO /* RPI GPIO4 */
+			MXRT105X_PAD_AD_B1_09_GPIO1_IO25	MXRT105X_PAD_CFG_GPIO /* RPI GPIO5 */
+			MXRT105X_PAD_AD_B1_10_GPIO1_IO26	MXRT105X_PAD_CFG_GPIO /* RPI GPIO6 */
+			MXRT105X_PAD_AD_B1_11_GPIO1_IO27	MXRT105X_PAD_CFG_GPIO /* RPI GPIO7 */
+
+			MXRT105X_PAD_AD_B1_02_GPIO1_IO18	MXRT105X_PAD_CFG_GPIO /* RPI GPIO8 */
+			MXRT105X_PAD_AD_B1_03_GPIO1_IO19	MXRT105X_PAD_CFG_GPIO /* RPI GPIO9 */
+			MXRT105X_PAD_AD_B1_04_GPIO1_IO20	MXRT105X_PAD_CFG_GPIO /* RPI GPIO10 */
+			MXRT105X_PAD_AD_B1_05_GPIO1_IO21	MXRT105X_PAD_CFG_GPIO /* RPI GPIO11 */
+
+			MXRT105X_PAD_AD_B1_12_GPIO1_IO28	MXRT105X_PAD_CFG_GPIO /* RPI GPIO12 */
+			MXRT105X_PAD_AD_B1_13_GPIO1_IO29	MXRT105X_PAD_CFG_GPIO /* RPI GPIO13 */
+			MXRT105X_PAD_AD_B1_14_GPIO1_IO30	MXRT105X_PAD_CFG_GPIO /* RPI GPIO16 */
+			MXRT105X_PAD_AD_B1_15_GPIO1_IO31	MXRT105X_PAD_CFG_GPIO /* RPI GPIO17 */
+			MXRT105X_PAD_AD_B0_04_GPIO1_IO04	MXRT105X_PAD_CFG_GPIO /* RPI GPIO18 */
+			MXRT105X_PAD_AD_B0_05_GPIO1_IO05	MXRT105X_PAD_CFG_GPIO /* RPI GPIO19 */
+
+			MXRT105X_PAD_AD_B0_14_GPIO1_IO14	MXRT105X_PAD_CFG_GPIO /* RPI GPIO20 */
+			MXRT105X_PAD_AD_B0_15_GPIO1_IO15	MXRT105X_PAD_CFG_GPIO /* RPI GPIO21 */
+			MXRT105X_PAD_AD_B0_06_GPIO1_IO06	MXRT105X_PAD_CFG_GPIO /* RPI GPIO22 */
+			MXRT105X_PAD_AD_B0_07_GPIO1_IO07	MXRT105X_PAD_CFG_GPIO /* RPI GPIO23 */
+			MXRT105X_PAD_AD_B0_08_GPIO1_IO08	MXRT105X_PAD_CFG_GPIO /* RPI GPIO24 */
+			MXRT105X_PAD_AD_B0_11_GPIO1_IO11	MXRT105X_PAD_CFG_GPIO /* RPI GPIO25 */
+			MXRT105X_PAD_B1_14_GPIO2_IO30   MXRT105X_PAD_CFG_GPIO /* RPI GPIO27 */
+		>;
+	};
+
+	pinctrl_lpi2c1: lpi2cgrp {
+		fsl,pins = <
+			MXRT105X_PAD_AD_B1_00_LPI2C1_SCL	MXRT105X_PAD_CFG_I2C
+			MXRT105X_PAD_AD_B1_01_LPI2C1_SDA	MXRT105X_PAD_CFG_I2C
+		>;
+	};
+};
+
+&lpi2c1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lpi2c1>;
+	status = "okay";
+
+	imx-ccm-init = "fsl,imx6sx-ccm";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	s35390a@30 {
+		compatible = "sii,s35390a";
+		reg = <0x30>;
+	};
+
+};
